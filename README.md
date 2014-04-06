@@ -5,10 +5,10 @@ A Clojure library designed to score poker hands.
 ## Usage
 
 Try
-    user=> (beats? full-house-hand straight-flush-hand)
-    false
-    user=> (value flush-hand)
-    5020
+	user=> (beats? full-house-hand straight-flush-hand)
+	false
+	user=> (value flush-hand)
+	5020
 
 
 ## License
