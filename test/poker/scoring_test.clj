@@ -25,6 +25,7 @@
   (is (thrown? clojure.lang.ArityException (position five-kind-hand)))
   (is (thrown? clojure.lang.ArityException (position four-kind-hand)))
   (is (thrown? clojure.lang.ArityException (position full-house-hand)))
+  (is (thrown? clojure.lang.ArityException (position straight-hand)))
   (is (thrown? clojure.lang.ArityException (position flush-hand)))
   (is
    (thrown?
@@ -67,6 +68,7 @@
   (is (thrown? clojure.lang.ArityException (member? five-kind-hand)))
   (is (thrown? clojure.lang.ArityException (member? four-kind-hand)))
   (is (thrown? clojure.lang.ArityException (member? full-house-hand)))
+  (is (thrown? clojure.lang.ArityException (member? straight-hand)))
   (is (thrown? clojure.lang.ArityException (member? flush-hand)))
   (is
    (thrown? clojure.lang.ArityException (member? straight-flush-hand)))
@@ -102,6 +104,7 @@
   (is (= (wild? five-kind-hand) 'false))
   (is (= (wild? four-kind-hand) 'false))
   (is (= (wild? full-house-hand) 'false))
+  (is (= (wild? straight-hand) 'false))
   (is (= (wild? flush-hand) 'false))
   (is (= (wild? straight-flush-hand) 'false))
   (is (= (wild? royal-flush-hand) 'false))
@@ -132,6 +135,7 @@
   (is (thrown? clojure.lang.ArityException (n-kind? five-kind-hand)))
   (is (thrown? clojure.lang.ArityException (n-kind? four-kind-hand)))
   (is (thrown? clojure.lang.ArityException (n-kind? full-house-hand)))
+  (is (thrown? clojure.lang.ArityException (n-kind? straight-hand)))
   (is (thrown? clojure.lang.ArityException (n-kind? flush-hand)))
   (is
    (thrown? clojure.lang.ArityException (n-kind? straight-flush-hand)))
@@ -174,6 +178,7 @@
   (is (= (two-pair? five-kind-hand) 'false))
   (is (= (two-pair? four-kind-hand) 'false))
   (is (= (two-pair? full-house-hand) 'true))
+  (is (= (two-pair? straight-hand) 'false))
   (is (= (two-pair? flush-hand) 'false))
   (is (= (two-pair? straight-flush-hand) 'false))
   (is (= (two-pair? royal-flush-hand) 'false))
@@ -217,6 +222,7 @@
   (is (= (full-house? five-kind-hand) 'false))
   (is (= (full-house? four-kind-hand) 'false))
   (is (= (full-house? full-house-hand) 'true))
+  (is (= (full-house? straight-hand) 'nil))
   (is (= (full-house? flush-hand) 'nil))
   (is (= (full-house? straight-flush-hand) 'nil))
   (is (= (full-house? royal-flush-hand) 'nil))
@@ -255,7 +261,8 @@
   (is (= (flush? five-kind-hand) 'false))
   (is (= (flush? four-kind-hand) 'false))
   (is (= (flush? full-house-hand) 'false))
-  (is (= (flush? flush-hand) 'false))
+  (is (= (flush? straight-hand) 'false))
+  (is (= (flush? flush-hand) 'true))
   (is (= (flush? straight-flush-hand) 'true))
   (is (= (flush? royal-flush-hand) 'true))
   (is
@@ -295,7 +302,8 @@
   (is (= (all-ranks five-kind-hand) '#{nil :ace}))
   (is (= (all-ranks four-kind-hand) '#{2 3}))
   (is (= (all-ranks full-house-hand) '#{2 3}))
-  (is (= (all-ranks flush-hand) '#{2 3 4 5 6}))
+  (is (= (all-ranks straight-hand) '#{2 3 4 5 6}))
+  (is (= (all-ranks flush-hand) '#{2 :queen 3 :jack :ace}))
   (is (= (all-ranks straight-flush-hand) '#{2 3 4 5 6}))
   (is (= (all-ranks royal-flush-hand) '#{:queen :king :jack 10 :ace}))
   (is
@@ -328,6 +336,7 @@
   (is (thrown? clojure.lang.ArityException (n-ranks? five-kind-hand)))
   (is (thrown? clojure.lang.ArityException (n-ranks? four-kind-hand)))
   (is (thrown? clojure.lang.ArityException (n-ranks? full-house-hand)))
+  (is (thrown? clojure.lang.ArityException (n-ranks? straight-hand)))
   (is (thrown? clojure.lang.ArityException (n-ranks? flush-hand)))
   (is
    (thrown?
@@ -350,5 +359,332 @@
   "rank-values"
   (is (= (rank-values nil) '()))
   (is (= (rank-values ()) '()))
-  (is (= (rank-values '(a :b "c")) '(0 0 0)))))
-  
+  (is (= (rank-values '(a :b "c")) '(0 0 0)))
+  (deftest
+ test-face-value
+ (testing
+  "face-value"
+  (is (= (face-value nil) '0))
+  (is (= (face-value ()) '0))
+  (is (= (face-value '(a :b "c")) '0))
+  (is (thrown? java.lang.IllegalArgumentException (face-value true)))
+  (is (= (face-value "test") '0))
+  (is (thrown? java.lang.IllegalArgumentException (face-value :test)))
+  (is (thrown? java.lang.IllegalArgumentException (face-value 0)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (face-value Integer/MAX_VALUE)))
+  (is (thrown? java.lang.IllegalArgumentException (face-value 22/7)))
+  (is (thrown? java.lang.IllegalArgumentException (face-value 1.0E-4)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (face-value -1.0E-4)))
+  (is (= (face-value ranks) '0))
+  (is (= (face-value suits) '0))
+  (is (= (face-value five-kind-hand) '56))
+  (is (= (face-value four-kind-hand) '11))
+  (is (= (face-value full-house-hand) '12))
+  (is (= (face-value straight-hand) '20))
+  (is (= (face-value flush-hand) '42))
+  (is (= (face-value straight-flush-hand) '20))
+  (is (= (face-value royal-flush-hand) '60))
+  (is
+   (=
+    (face-value
+     "Returns the sum of the face values of cards in a hand")
+    '0))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest
+ test-straight?
+ (testing
+  "straight?"
+  (is (thrown? clojure.lang.ArityException (straight? nil)))
+  (is (thrown? clojure.lang.ArityException (straight? ())))
+  (is (thrown? clojure.lang.ArityException (straight? '(a :b "c"))))
+  (is (thrown? java.lang.IllegalArgumentException (straight? true)))
+  (is (thrown? clojure.lang.ArityException (straight? "test")))
+  (is (thrown? java.lang.IllegalArgumentException (straight? :test)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 0)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (straight? Integer/MAX_VALUE)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 22/7)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 1.0E-4)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? -1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (straight? ranks)))
+  (is (thrown? clojure.lang.ArityException (straight? suits)))
+  (is (= (straight? five-kind-hand) 'false))
+  (is (= (straight? four-kind-hand) 'false))
+  (is (= (straight? full-house-hand) 'false))
+  (is (= (straight? straight-hand) 'true))
+  (is (= (straight? flush-hand) 'false))
+  (is (= (straight? straight-flush-hand) 'true))
+  (is (= (straight? royal-flush-hand) 'true))
+  (is
+   (thrown?
+    clojure.lang.ArityException
+    (straight?
+     "True if hand is a straight (i.e. card values in sequence) (jokers wild)")))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 5)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 6)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 4)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 5)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 6)))
+  (is (thrown? java.lang.IllegalArgumentException (straight? 4)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest
+ test-straight-flush?
+ (testing
+  "straight-flush?"
+  (is (thrown? clojure.lang.ArityException (straight-flush? nil)))
+  (is (thrown? clojure.lang.ArityException (straight-flush? ())))
+  (is
+   (thrown? clojure.lang.ArityException (straight-flush? '(a :b "c"))))
+  (is
+   (thrown? java.lang.IllegalArgumentException (straight-flush? true)))
+  (is (thrown? clojure.lang.ArityException (straight-flush? "test")))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (straight-flush? :test)))
+  (is (thrown? java.lang.IllegalArgumentException (straight-flush? 0)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (straight-flush? Integer/MAX_VALUE)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (straight-flush? 22/7)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (straight-flush? 1.0E-4)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (straight-flush? -1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (straight-flush? ranks)))
+  (is (thrown? clojure.lang.ArityException (straight-flush? suits)))
+  (is (= (straight-flush? five-kind-hand) 'false))
+  (is (= (straight-flush? four-kind-hand) 'false))
+  (is (= (straight-flush? full-house-hand) 'false))
+  (is (= (straight-flush? straight-hand) 'false))
+  (is (= (straight-flush? flush-hand) 'false))
+  (is (= (straight-flush? straight-flush-hand) 'true))
+  (is (= (straight-flush? royal-flush-hand) 'true))
+  (is
+   (thrown?
+    clojure.lang.ArityException
+    (straight-flush?
+     "True if hand is a straight flush (all same suit, values in sequence) \n\t(jokers wild)")))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest
+ test-royal-flush?
+ (testing
+  "royal-flush?"
+  (is (thrown? clojure.lang.ArityException (royal-flush? nil)))
+  (is (thrown? clojure.lang.ArityException (royal-flush? ())))
+  (is (thrown? clojure.lang.ArityException (royal-flush? '(a :b "c"))))
+  (is (thrown? java.lang.IllegalArgumentException (royal-flush? true)))
+  (is (thrown? clojure.lang.ArityException (royal-flush? "test")))
+  (is
+   (thrown? java.lang.IllegalArgumentException (royal-flush? :test)))
+  (is (thrown? java.lang.IllegalArgumentException (royal-flush? 0)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (royal-flush? Integer/MAX_VALUE)))
+  (is (thrown? java.lang.IllegalArgumentException (royal-flush? 22/7)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (royal-flush? 1.0E-4)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (royal-flush? -1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (royal-flush? ranks)))
+  (is (thrown? clojure.lang.ArityException (royal-flush? suits)))
+  (is (= (royal-flush? five-kind-hand) 'false))
+  (is (= (royal-flush? four-kind-hand) 'false))
+  (is (= (royal-flush? full-house-hand) 'false))
+  (is (= (royal-flush? straight-hand) 'false))
+  (is (= (royal-flush? flush-hand) 'false))
+  (is (= (royal-flush? straight-flush-hand) 'false))
+  (is (= (royal-flush? royal-flush-hand) 'true))
+  (is
+   (thrown?
+    clojure.lang.ArityException
+    (royal-flush?
+     "True if hand is a royal flush (straight flush including ace) \n\t(jokers wild)")))
+  (is (thrown? java.lang.IllegalArgumentException (royal-flush? :ace)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (royal-flush? :joker)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (royal-flush? :king)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest
+ test-class-value
+ (testing
+  "class-value"
+  (is (thrown? clojure.lang.ArityException (class-value nil)))
+  (is (thrown? clojure.lang.ArityException (class-value ())))
+  (is (thrown? clojure.lang.ArityException (class-value '(a :b "c"))))
+  (is (thrown? java.lang.IllegalArgumentException (class-value true)))
+  (is (thrown? clojure.lang.ArityException (class-value "test")))
+  (is (thrown? java.lang.IllegalArgumentException (class-value :test)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 0)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (class-value Integer/MAX_VALUE)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 22/7)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (class-value 1.0E-4)))
+  (is
+   (thrown? java.lang.IllegalArgumentException (class-value -1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (class-value ranks)))
+  (is (thrown? clojure.lang.ArityException (class-value suits)))
+  (is (= (class-value five-kind-hand) '110))
+  (is (= (class-value four-kind-hand) '80))
+  (is (= (class-value full-house-hand) '70))
+  (is (= (class-value straight-hand) '50))
+  (is (= (class-value flush-hand) '60))
+  (is (= (class-value straight-flush-hand) '90))
+  (is (= (class-value royal-flush-hand) '100))
+  (is
+   (thrown?
+    clojure.lang.ArityException
+    (class-value
+     "Return a value based on the class of the hand. Values are essentially \n\tarbitrary but maintain the correct ordering.")))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 5)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 6)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 4)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 110)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 111)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 109)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 100)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 101)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 99)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 90)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 91)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 89)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 4)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 5)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 3)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 80)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 81)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 79)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 70)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 71)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 69)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 60)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 61)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 59)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 50)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 51)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 49)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 3)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 4)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 2)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 40)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 41)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 39)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 30)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 31)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 29)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 2)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 3)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 1)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 20)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 21)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value 19)))
+  (is (thrown? java.lang.IllegalArgumentException (class-value true)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest
+ test-value
+ (testing
+  "value"
+  (is (thrown? clojure.lang.ArityException (value nil)))
+  (is (thrown? clojure.lang.ArityException (value ())))
+  (is (thrown? clojure.lang.ArityException (value '(a :b "c"))))
+  (is (thrown? java.lang.IllegalArgumentException (value true)))
+  (is (thrown? clojure.lang.ArityException (value "test")))
+  (is (thrown? java.lang.IllegalArgumentException (value :test)))
+  (is (thrown? java.lang.IllegalArgumentException (value 0)))
+  (is
+   (thrown?
+    java.lang.IllegalArgumentException
+    (value Integer/MAX_VALUE)))
+  (is (thrown? java.lang.IllegalArgumentException (value 22/7)))
+  (is (thrown? java.lang.IllegalArgumentException (value 1.0E-4)))
+  (is (thrown? java.lang.IllegalArgumentException (value -1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (value ranks)))
+  (is (thrown? clojure.lang.ArityException (value suits)))
+  (is (= (value five-kind-hand) '11056))
+  (is (= (value four-kind-hand) '8011))
+  (is (= (value full-house-hand) '7012))
+  (is (= (value straight-hand) '5020))
+  (is (= (value flush-hand) '6042))
+  (is (= (value straight-flush-hand) '9020))
+  (is (= (value royal-flush-hand) '10060))
+  (is
+   (thrown?
+    clojure.lang.ArityException
+    (value
+     "Return a value for the hand. Values are essentially arbitrary but \n\tmaintain the correct ordering.")))
+  (is (thrown? java.lang.IllegalArgumentException (value 100)))
+  (is (thrown? java.lang.IllegalArgumentException (value 101)))
+  (is (thrown? java.lang.IllegalArgumentException (value 99)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest
+ test-beats?
+ (testing
+  "beats?"
+  (is (thrown? clojure.lang.ArityException (beats? nil)))
+  (is (thrown? clojure.lang.ArityException (beats? ())))
+  (is (thrown? clojure.lang.ArityException (beats? '(a :b "c"))))
+  (is (thrown? clojure.lang.ArityException (beats? true)))
+  (is (thrown? clojure.lang.ArityException (beats? "test")))
+  (is (thrown? clojure.lang.ArityException (beats? :test)))
+  (is (thrown? clojure.lang.ArityException (beats? 0)))
+  (is (thrown? clojure.lang.ArityException (beats? Integer/MAX_VALUE)))
+  (is (thrown? clojure.lang.ArityException (beats? 22/7)))
+  (is (thrown? clojure.lang.ArityException (beats? 1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (beats? -1.0E-4)))
+  (is (thrown? clojure.lang.ArityException (beats? ranks)))
+  (is (thrown? clojure.lang.ArityException (beats? suits)))
+  (is (thrown? clojure.lang.ArityException (beats? five-kind-hand)))
+  (is (thrown? clojure.lang.ArityException (beats? four-kind-hand)))
+  (is (thrown? clojure.lang.ArityException (beats? full-house-hand)))
+  (is (thrown? clojure.lang.ArityException (beats? straight-hand)))
+  (is (thrown? clojure.lang.ArityException (beats? flush-hand)))
+  (is
+   (thrown? clojure.lang.ArityException (beats? straight-flush-hand)))
+  (is (thrown? clojure.lang.ArityException (beats? royal-flush-hand)))
+  (is
+   (thrown?
+    clojure.lang.ArityException
+    (beats? "True if hand1 scores higher than hand2")))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;; end of file ;;
+

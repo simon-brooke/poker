@@ -26,11 +26,17 @@
 		{:suit :heart :rank 3}
 		{:suit :spade :rank 3}))
 
-(def flush-hand '({:suit :heart :rank 2}
+(def straight-hand '({:suit :heart :rank 2}
 		{:suit :heart :rank 3}
 		{:suit :diamond :rank 4}
 		{:suit :club :rank 5}
 		{:suit :spade :rank 6}))
+
+(def flush-hand '({:suit :heart :rank 2}
+		{:suit :heart :rank 3}
+		{:suit :heart :rank :jack}
+		{:suit :heart :rank :queen}
+		{:suit :heart :rank :ace}))
 
 (def straight-flush-hand '({:suit :heart :rank 2}
 		{:suit :heart :rank 3}
